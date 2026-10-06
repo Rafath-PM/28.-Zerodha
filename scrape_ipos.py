@@ -259,7 +259,10 @@ def main():
 
     added_unlisted = 0
     for u_stock in unlisted_ipos:
-        if not is_already_listed(u_stock["name"]):
+        ed = str(u_stock.get("expectedDate", ""))
+        # Only include active recent IPOs from current/recent subscription window (September/October 2026)
+        is_recent_window = any(m in ed for m in ["October", "Oct", "September", "Sep"]) or not u_stock.get("expectedDate")
+        if is_recent_window and not is_already_listed(u_stock["name"]):
             cleaned_stocks.append(u_stock)
             added_unlisted += 1
     print(f"Added {added_unlisted} genuine unlisted IPOs awaiting listing.")
