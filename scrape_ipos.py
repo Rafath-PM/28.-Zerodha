@@ -353,15 +353,65 @@ def determine_ipo_status(date_str):
 
 def fetch_unlisted_ipos():
     unlisted_stocks = []
+    
+    # 1. Scrape IPOWatch Mainboard & SME live subscription tables
     try:
-        # Fetch 100% direct live status from Chittorgarh Dashboard
-        url = 'https://www.chittorgarh.com/ipo/ipo_dashboard.asp'
+        url = 'https://ipowatch.in/upcoming-ipo-list/'
         req = requests.get(url, headers=headers, timeout=15)
         if req.status_code == 200:
             soup = BeautifulSoup(req.text, 'html.parser')
             tables = soup.find_all('table')
-            if len(tables) > 0:
-                t0 = tables[0]
+            
+            for t_idx in range(min(2, len(tables))):
+                t = tables[t_idx]
+                cat_name = "Mainboard IPO" if t_idx == 0 else "SME IPO"
+                rows = t.find_all('tr')[1:]
+                for idx, r in enumerate(rows):
+                    cols = [td.get_text(strip=True) for td in r.find_all(['th', 'td'])]
+                    if len(cols) >= 4:
+                        name = cols[0]
+                        date = cols[1]
+                        size = cols[2]
+                        price_band = cols[3]
+                        platform = cols[4] if len(cols) > 4 and ('NSE' in cols[4] or 'BSE' in cols[4]) else cat_name
+                        
+                        prices = re.findall(r'\d+(?:\.\d+)?', price_band.replace(',', ''))
+                        issue_price = float(prices[-1]) if prices else 0.0
+                        
+                        clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', name).upper()[:10]
+                        status_type = determine_ipo_status(date)
+                        
+                        unlisted_stocks.append({
+                            'id': f'unlisted-ipowatch-t{t_idx}-{idx+1}',
+                            'name': name if 'SME' not in platform else f"{name} (SME)",
+                            'symbol': clean_symbol or 'UNLISTED',
+                            'listingDate': '2026-10-06',
+                            'expectedDate': date,
+                            'issuePrice': issue_price,
+                            'listingPrice': 0.0,
+                            'listingGain': 0.0,
+                            'currentPrice': 0.0,
+                            'currentReturn': 0.0,
+                            'status': status_type,
+                            'sector': platform,
+                            'description': f'{name} IPO ({platform}) is currently {"open for bidding" if status_type == "open" else "awaiting allotment / listing"} (Bidding Window: {date}). Expected Issue Size is {size} with Price Band of {price_band}.',
+                            'recommendation': f'Price Band: {price_band} | Issue Size: {size}',
+                            'authorRecommendation': f'{"IPO Open Now" if status_type == "open" else "Awaiting Listing"} ({date})',
+                            'priceBand': price_band,
+                            'issueSize': size
+                        })
+    except Exception as e:
+        print('Error fetching IPOWatch unlisted IPOs:', e)
+
+    # 2. Also merge direct Chittorgarh Dashboard badges
+    try:
+        url_dash = 'https://www.chittorgarh.com/ipo/ipo_dashboard.asp'
+        req_dash = requests.get(url_dash, headers=headers, timeout=15)
+        if req_dash.status_code == 200:
+            soup_dash = BeautifulSoup(req_dash.text, 'html.parser')
+            tables_dash = soup_dash.find_all('table')
+            if len(tables_dash) > 0:
+                t0 = tables_dash[0]
                 for idx, r in enumerate(t0.find_all('tr')[1:]):
                     tds = r.find_all('td')
                     if tds:
@@ -371,19 +421,12 @@ def fetch_unlisted_ipos():
                             continue
                         company_name = a_tag.get_text(strip=True)
                         
-                        # Inspect live status badge tags from Chittorgarh
                         badge_spans = name_td.find_all('span', class_=re.compile('badge'))
                         badge_classes = ' '.join([' '.join(b.get('class', [])) for b in badge_spans])
                         badge_titles = ' '.join([b.get('title', '') for b in badge_spans if b.get('title')])
-                        
                         date_span = name_td.find('span', class_=re.compile('float-end'))
                         date_str = date_span.get_text(strip=True) if date_span else ''
                         
-                        # DIRECT STATUS EXTRACTION:
-                        # Chittorgarh tags active open/unlisted IPOs with badges on ipo_dashboard.asp:
-                        # - bg-success / 'open' title -> Currently Open for Bidding
-                        # - bg-warning / bg-info ('P' / 'LT') -> Awaiting Listing
-                        # - No badge -> Already Listed (or DRHP)
                         if badge_spans:
                             status_type = 'open' if 'bg-success' in badge_classes or 'open' in badge_titles.lower() else 'unlisted'
                             clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', company_name).upper()[:10]
@@ -400,7 +443,7 @@ def fetch_unlisted_ipos():
                                 'currentPrice': 0.0,
                                 'currentReturn': 0.0,
                                 'status': status_type,
-                                'sector': 'Mainboard / SME IPO',
+                                'sector': 'Mainboard IPO',
                                 'description': f'{company_name} IPO is currently {"open for bidding" if status_type == "open" else "awaiting allotment / listing"} (Bidding Window: {date_str}).',
                                 'recommendation': f'Bidding Window: {date_str}',
                                 'authorRecommendation': badge_titles or ('Open Now' if status_type == 'open' else 'Awaiting Listing'),
@@ -408,7 +451,8 @@ def fetch_unlisted_ipos():
                                 'issueSize': 'Mainboard'
                             })
     except Exception as e:
-        print('Error fetching direct unlisted IPOs:', e)
+        print('Error fetching Chittorgarh dashboard IPOs:', e)
+
     return unlisted_stocks
 
 def fetch_drhp_stocks():
