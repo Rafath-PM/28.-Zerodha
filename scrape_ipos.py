@@ -354,53 +354,61 @@ def determine_ipo_status(date_str):
 def fetch_unlisted_ipos():
     unlisted_stocks = []
     try:
-        url = 'https://ipowatch.in/upcoming-ipo-list/'
+        # Fetch 100% direct live status from Chittorgarh Dashboard
+        url = 'https://www.chittorgarh.com/ipo/ipo_dashboard.asp'
         req = requests.get(url, headers=headers, timeout=15)
         if req.status_code == 200:
             soup = BeautifulSoup(req.text, 'html.parser')
             tables = soup.find_all('table')
-            
-            # Scrape both Table 0 (Mainboard) and Table 1 (SME)
-            for t_idx in range(min(2, len(tables))):
-                t = tables[t_idx]
-                category_name = "Mainboard IPO" if t_idx == 0 else "SME IPO"
-                rows = t.find_all('tr')[1:]
-                for idx, r in enumerate(rows):
-                    cols = [td.get_text(strip=True) for td in r.find_all(['th', 'td'])]
-                    if len(cols) >= 4:
-                        name = cols[0]
-                        date = cols[1]
-                        size = cols[2]
-                        price_band = cols[3]
-                        platform = cols[4] if len(cols) > 4 and ('NSE' in cols[4] or 'BSE' in cols[4]) else category_name
+            if len(tables) > 0:
+                t0 = tables[0]
+                for idx, r in enumerate(t0.find_all('tr')[1:]):
+                    tds = r.find_all('td')
+                    if tds:
+                        name_td = tds[0]
+                        a_tag = name_td.find('a')
+                        if not a_tag:
+                            continue
+                        company_name = a_tag.get_text(strip=True)
                         
-                        prices = re.findall(r'\d+(?:\.\d+)?', price_band.replace(',', ''))
-                        issue_price = float(prices[-1]) if prices else 0.0
+                        # Inspect live status badge tags from Chittorgarh
+                        badge_spans = name_td.find_all('span', class_=re.compile('badge'))
+                        badge_classes = ' '.join([' '.join(b.get('class', [])) for b in badge_spans])
+                        badge_titles = ' '.join([b.get('title', '') for b in badge_spans if b.get('title')])
                         
-                        clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', name).upper()[:10]
-                        status_type = determine_ipo_status(date)
+                        date_span = name_td.find('span', class_=re.compile('float-end'))
+                        date_str = date_span.get_text(strip=True) if date_span else ''
                         
-                        unlisted_stocks.append({
-                            'id': f'unlisted-t{t_idx}-{idx+1}',
-                            'name': name if 'SME' not in platform else f"{name} (SME)",
-                            'symbol': clean_symbol or 'UNLISTED',
-                            'listingDate': '2026-10-06',
-                            'expectedDate': date,
-                            'issuePrice': issue_price,
-                            'listingPrice': 0.0,
-                            'listingGain': 0.0,
-                            'currentPrice': 0.0,
-                            'currentReturn': 0.0,
-                            'status': status_type,
-                            'sector': platform,
-                            'description': f'{name} IPO ({platform}) is {status_type} (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
-                            'recommendation': f'Price Band: {price_band} | Issue Size: {size}',
-                            'authorRecommendation': f'{"IPO Open Now" if status_type == "open" else "Awaiting Listing"} ({date})',
-                            'priceBand': price_band,
-                            'issueSize': size
-                        })
+                        # DIRECT STATUS EXTRACTION:
+                        # Chittorgarh tags active open/unlisted IPOs with badges on ipo_dashboard.asp:
+                        # - bg-success / 'open' title -> Currently Open for Bidding
+                        # - bg-warning / bg-info ('P' / 'LT') -> Awaiting Listing
+                        # - No badge -> Already Listed (or DRHP)
+                        if badge_spans:
+                            status_type = 'open' if 'bg-success' in badge_classes or 'open' in badge_titles.lower() else 'unlisted'
+                            clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', company_name).upper()[:10]
+                            
+                            unlisted_stocks.append({
+                                'id': f'direct-dash-{idx+1}',
+                                'name': company_name,
+                                'symbol': clean_symbol or 'IPO',
+                                'listingDate': '2026-10-06',
+                                'expectedDate': date_str,
+                                'issuePrice': 0.0,
+                                'listingPrice': 0.0,
+                                'listingGain': 0.0,
+                                'currentPrice': 0.0,
+                                'currentReturn': 0.0,
+                                'status': status_type,
+                                'sector': 'Mainboard / SME IPO',
+                                'description': f'{company_name} IPO is currently {"open for bidding" if status_type == "open" else "awaiting allotment / listing"} (Bidding Window: {date_str}).',
+                                'recommendation': f'Bidding Window: {date_str}',
+                                'authorRecommendation': badge_titles or ('Open Now' if status_type == 'open' else 'Awaiting Listing'),
+                                'priceBand': 'See Detail',
+                                'issueSize': 'Mainboard'
+                            })
     except Exception as e:
-        print('Error fetching unlisted IPOs:', e)
+        print('Error fetching direct unlisted IPOs:', e)
     return unlisted_stocks
 
 def fetch_drhp_stocks():
