@@ -291,10 +291,11 @@ def main():
     seen_unlisted_names = set()
     for u_stock in unlisted_ipos:
         ed = parse_end_date(u_stock.get("expectedDate"))
-        # Only include active recent IPOs whose bidding ended within the last 10 days (>= Sep 25 or October)
+        # Strictly enforce Indian T+3 / T+5 listing cutoff:
+        # Bidding must have closed on or after September 28th or October
         is_active_window = False
         if ed:
-            if (ed.month == 10) or (ed.month == 9 and ed.day >= 25):
+            if (ed.month == 10) or (ed.month == 9 and ed.day >= 28):
                 is_active_window = True
         elif not u_stock.get("expectedDate"):
             is_active_window = True
