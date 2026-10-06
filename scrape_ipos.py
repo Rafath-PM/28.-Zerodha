@@ -273,6 +273,51 @@ def main():
     print(f"Scraper finished in {end_time - start_time:.2f} seconds.")
     print(f"Database saved to {output_path}")
 
+def determine_ipo_status(date_str):
+    import datetime
+    today = datetime.date(2026, 10, 6)
+    
+    months = {
+        'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+        'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'october': 10, 'oct': 10,
+        'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+    }
+    
+    found_month = None
+    for m_name, m_num in months.items():
+        if m_name in date_str.lower():
+            found_month = m_num
+            break
+            
+    if not found_month:
+        return 'unlisted'
+        
+    nums = re.findall(r'\d+', date_str)
+    if len(nums) >= 2:
+        start_day = int(nums[0])
+        end_day = int(nums[1])
+        
+        start_month = found_month
+        end_month = found_month
+        
+        if start_day > end_day:
+            start_month = found_month - 1 if found_month > 1 else 12
+            
+        try:
+            start_date = datetime.date(2026, start_month, start_day)
+            end_date = datetime.date(2026, end_month, end_day)
+            
+            if start_date <= today <= end_date:
+                return 'open'
+            elif today > end_date:
+                return 'unlisted'
+            else:
+                return 'unlisted'
+        except:
+            pass
+    return 'unlisted'
+
 def fetch_unlisted_ipos():
     unlisted_stocks = []
     try:
@@ -281,8 +326,12 @@ def fetch_unlisted_ipos():
         if req.status_code == 200:
             soup = BeautifulSoup(req.text, 'html.parser')
             tables = soup.find_all('table')
-            if len(tables) >= 1:
-                rows = tables[0].find_all('tr')[1:]
+            
+            # Scrape both Table 0 (Mainboard) and Table 1 (SME)
+            for t_idx in range(min(2, len(tables))):
+                t = tables[t_idx]
+                category_name = "Mainboard IPO" if t_idx == 0 else "SME IPO"
+                rows = t.find_all('tr')[1:]
                 for idx, r in enumerate(rows):
                     cols = [td.get_text(strip=True) for td in r.find_all(['th', 'td'])]
                     if len(cols) >= 4:
@@ -290,20 +339,17 @@ def fetch_unlisted_ipos():
                         date = cols[1]
                         size = cols[2]
                         price_band = cols[3]
+                        platform = cols[4] if len(cols) > 4 and ('NSE' in cols[4] or 'BSE' in cols[4]) else category_name
                         
                         prices = re.findall(r'\d+(?:\.\d+)?', price_band.replace(',', ''))
                         issue_price = float(prices[-1]) if prices else 0.0
                         
                         clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', name).upper()[:10]
+                        status_type = determine_ipo_status(date)
                         
-                        status_type = 'unlisted'
-                        # Determine if currently open based on issue dates string (e.g. "30-5 October", "28-30 September")
-                        if 'October' in date or 'Oct' in date:
-                            status_type = 'open'
-                            
                         unlisted_stocks.append({
-                            'id': f'unlisted-ipowatch-{idx+1}',
-                            'name': name,
+                            'id': f'unlisted-t{t_idx}-{idx+1}',
+                            'name': name if 'SME' not in platform else f"{name} (SME)",
                             'symbol': clean_symbol or 'UNLISTED',
                             'listingDate': '2026-10-06',
                             'expectedDate': date,
@@ -313,10 +359,10 @@ def fetch_unlisted_ipos():
                             'currentPrice': 0.0,
                             'currentReturn': 0.0,
                             'status': status_type,
-                            'sector': 'Mainboard IPO',
-                            'description': f'{name} IPO is {status_type} (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
+                            'sector': platform,
+                            'description': f'{name} IPO ({platform}) is {status_type} (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
                             'recommendation': f'Price Band: {price_band} | Issue Size: {size}',
-                            'authorRecommendation': f'{"IPO Open" if status_type == "open" else "Awaiting Listing"} ({date})',
+                            'authorRecommendation': f'{"IPO Open Now" if status_type == "open" else "Awaiting Listing"} ({date})',
                             'priceBand': price_band,
                             'issueSize': size
                         })

@@ -373,6 +373,7 @@ function renderStocks() {
     const isGainListing = stock.listingGain >= 0;
     const isCurrentReturnPositive = stock.currentReturn >= 0;
     const isSaved = watchlist.includes(stock.id);
+    const isOpen = stock.status === "open";
     const isUnlisted = stock.status === "unlisted";
     const isUpcoming = stock.status === "upcoming";
     
@@ -386,13 +387,17 @@ function renderStocks() {
           </button>
           <h4>${stock.name}</h4>
         </div>
-        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUpcoming ? 'Status:' : (isUnlisted ? 'Listing Expected:' : 'Listed:')} ${isUpcoming ? stock.listingDate : (stock.expectedDate ? stock.expectedDate : formatDate(stock.listingDate))}</span>
+        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUpcoming ? 'Status:' : (isOpen ? 'Subscription Window:' : (isUnlisted ? 'Listing Expected:' : 'Listed:'))} ${isUpcoming ? stock.listingDate : (stock.expectedDate ? stock.expectedDate : formatDate(stock.listingDate))}</span>
         <div class="price-row">
-          ${isUpcoming ? `<span>Price Band: ${stock.priceBand || 'TBA'}</span> • <span>Size: ${stock.issueSize || 'TBA'}</span>` : `<span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : (stock.priceBand ? `• <span>Band: ${stock.priceBand}</span>` : '')}`}
+          ${isUpcoming ? `<span>Price Band: ${stock.priceBand || 'TBA'}</span> • <span>Size: ${stock.issueSize || 'TBA'}</span>` : (isOpen || isUnlisted ? `<span>Issue Price: ₹${stock.issuePrice}</span> ${stock.priceBand ? `• <span>Band: ${stock.priceBand}</span>` : ''}` : `<span>Issue Price: ₹${stock.issuePrice}</span> • <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>`)}
         </div>
       </div>
       <div class="stock-card-right">
-        ${isUpcoming ? `
+        ${isOpen ? `
+          <span class="badge" style="background-color: rgba(0, 230, 118, 0.12); border: 1px solid rgba(0, 230, 118, 0.3); color: #00e676; font-size: 0.72rem; padding: 4px 10px;">
+            <i class="fas fa-fire"></i> Open Now
+          </span>
+        ` : (isUpcoming ? `
           <span class="badge" style="background-color: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; font-size: 0.72rem; padding: 4px 10px;">
             <i class="fas fa-file-contract"></i> DRHP Filed
           </span>
@@ -406,7 +411,7 @@ function renderStocks() {
             <i class="fas ${isCurrentReturnPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
             ${isCurrentReturnPositive ? '+' : ''}${stock.currentReturn.toFixed(1)}%
           </span>
-        `)}
+        `))}
       </div>
     `;
     
