@@ -1,0 +1,989 @@
+/* ==========================================================================
+   Design System & Styling System
+   ========================================================================== */
+
+:root {
+  /* Color Palette */
+  --bg-color: #0b0d10;
+  --surface-color: #12161a;
+  --surface-light: #1c2229;
+  --surface-accent: #262f3a;
+  
+  --primary-color: #3b82f6;
+  --primary-glow: rgba(59, 130, 246, 0.15);
+  
+  --green-color: #00e676;
+  --green-glow: rgba(0, 230, 118, 0.15);
+  --green-text: #00e676;
+  
+  --red-color: #ff3b30;
+  --red-glow: rgba(255, 59, 48, 0.15);
+  --red-text: #ff5252;
+  
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-color: #242c35;
+  
+  /* Typography */
+  --font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-header: 'Outfit', sans-serif;
+  
+  /* Layout */
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #050608;
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background Decorative Orbs */
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 0;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.bg-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--primary-color) 0%, transparent 80%);
+  top: -10%;
+  left: -10%;
+}
+
+.bg-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--green-color) 0%, transparent 80%);
+  bottom: -10%;
+  right: -10%;
+}
+
+/* ==========================================================================
+   Mobile Phone Simulator Frame (Desktop View)
+   ========================================================================== */
+
+.phone-wrapper {
+  position: relative;
+  z-index: 10;
+  padding: 12px;
+  background: #1e293b;
+  border-radius: 52px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 
+              inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.phone-container {
+  width: 375px;
+  height: 812px; /* iPhone X/13 Mini standard aspect */
+  background-color: var(--bg-color);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+/* Status Bar */
+.status-bar {
+  height: 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  z-index: 100;
+  user-select: none;
+}
+
+.status-notch {
+  width: 150px;
+  height: 30px;
+  background: #000;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.status-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ==========================================================================
+   App Header & Navigation Layout
+   ========================================================================== */
+
+.app-header {
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: rgba(18, 22, 26, 0.8);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 90;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.logo-icon i {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.logo-text h1 {
+  font-family: var(--font-family-header);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to right, #ffffff, #e2e8f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-text .sub-text {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  display: block;
+}
+
+.profile-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--border-color);
+  background: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.profile-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--primary-color);
+}
+
+.profile-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================================
+   Content Area & Summary Stats
+   ========================================================================== */
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0 90px 0; /* extra bottom padding for navbar safety */
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Hide scrollbar for clean layout */
+}
+
+.app-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Summary Cards (Slide/Carousel Style) */
+.summary-section {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin-bottom: 20px;
+}
+
+.summary-section::-webkit-scrollbar {
+  display: none;
+}
+
+.summary-card {
+  flex: 0 0 85%;
+  scroll-snap-align: center;
+  background: linear-gradient(135deg, var(--surface-color) 0%, var(--surface-light) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary-color);
+}
+
+.summary-card.total-stats::before {
+  background: linear-gradient(90deg, var(--primary-color), var(--green-color));
+}
+
+.summary-card.top-performer::before {
+  background: var(--green-color);
+}
+
+.summary-card.low-performer::before {
+  background: var(--red-color);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-family: var(--font-family-header);
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin: 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.stat-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.text-trend.positive {
+  color: var(--green-text);
+}
+
+.text-green {
+  color: var(--green-text);
+}
+
+.text-red {
+  color: var(--red-text);
+}
+
+/* ==========================================================================
+   Controls: Search & Filters & Sort
+   ========================================================================== */
+
+.controls-section {
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+#search-input {
+  width: 100%;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 38px;
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 0.85rem;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+#search-input:focus {
+  border-color: var(--primary-color);
+  background-color: var(--surface-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filters-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-chip, .category-chip {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+}
+
+.filter-chip:hover, .category-chip:hover {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.filter-chip.active, .category-chip.active {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+}
+
+.sorting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+}
+
+.sorting-row label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#sort-select {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+#sort-select option {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Stocks List & Performance Cards
+   ========================================================================== */
+
+.stocks-section {
+  padding: 0 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-header h3 {
+  font-family: var(--font-family-header);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--green-color);
+  background-color: rgba(0, 230, 118, 0.1);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.live-indicator .pulse {
+  width: 6px;
+  height: 6px;
+  background-color: var(--green-color);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(0, 230, 118, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+  }
+}
+
+.stocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stock-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition-bounce);
+  user-select: none;
+}
+
+.stock-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--surface-accent);
+  background-color: var(--surface-light);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2);
+}
+
+.stock-card:active {
+  transform: scale(0.98);
+}
+
+.stock-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 65%;
+}
+
+.stock-card-left h4 {
+  font-family: var(--font-family-header);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-card-left .listing-date {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.watchlist-star-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.watchlist-star-btn:hover {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+
+.watchlist-star-btn.active {
+  color: #f59e0b;
+}
+
+.stock-card-left .price-row {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.stock-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.stock-card-right .current-price {
+  font-family: var(--font-family-header);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge.positive {
+  background-color: rgba(0, 230, 118, 0.08);
+  border: 1px solid rgba(0, 230, 118, 0.15);
+  color: var(--green-text);
+}
+
+.badge.negative {
+  background-color: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.15);
+  color: var(--red-text);
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   Bottom Navigation Bar
+   ========================================================================== */
+
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 68px;
+  background-color: rgba(18, 22, 26, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 95;
+  padding-bottom: 8px; /* Safe inset margin */
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  width: 20%;
+}
+
+.nav-item i {
+  font-size: 1.15rem;
+}
+
+.nav-item span {
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  color: var(--text-secondary);
+}
+
+.nav-item.active {
+  color: var(--primary-color);
+}
+
+/* ==========================================================================
+   Drawer Backdrop & Details Drawer (Slide up Modal)
+   ========================================================================== */
+
+.drawer-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 110;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detail-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 80%;
+  background-color: var(--surface-color);
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+  z-index: 120;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.detail-drawer.active {
+  transform: translateY(0);
+}
+
+.drawer-header {
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.drawer-notch {
+  width: 36px;
+  height: 4px;
+  background-color: var(--surface-accent);
+  border-radius: 2px;
+}
+
+.close-drawer {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.close-drawer:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 30px 20px;
+}
+
+/* Detail UI Components inside Drawer */
+.company-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.company-details-title h3 {
+  font-family: var(--font-family-header);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.company-details-title .sub-heading {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.performance-pill-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.performance-pill-container .current-val {
+  font-family: var(--font-family-header);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.drawer-desc-box {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+.drawer-desc-box h5 {
+  font-family: var(--font-family-header);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.drawer-desc-text {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.pricing-table-container {
+  margin-bottom: 24px;
+}
+
+.pricing-table-container h5 {
+  font-family: var(--font-family-header);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.pricing-table th, .pricing-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pricing-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.pricing-table td {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.pricing-table .right-align {
+  text-align: right;
+}
+
+.perf-metric-bar-group {
+  margin-bottom: 20px;
+}
+
+.perf-metric-bar-group h5 {
+  font-family: var(--font-family-header);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.metric-bar-container {
+  background-color: var(--surface-light);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.metric-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.chart-container-group {
+  margin-bottom: 24px;
+}
+
+.chart-container-group h5 {
+  font-family: var(--font-family-header);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.chart-canvas-wrapper {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 12px;
+  height: 180px;
+  position: relative;
+}
+
+/* ==========================================================================
+   Responsive & Accessibility
+   ========================================================================== */
+
+/* If on a native mobile layout, remove simulator border and padding */
+@media (max-width: 480px) {
+  body {
+    background-color: var(--bg-color);
+  }
+  
+  .phone-wrapper {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    border: none;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .phone-container {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  /* Hide simulated status bar and notch on actual mobile screens */
+  .status-bar {
+    display: none !important;
+  }
+  
+  .status-notch {
+    display: none !important;
+  }
+  
+  /* Adjust app header height and top padding to handle iPhone safe area (under the Dynamic Island) */
+  .app-header {
+    height: calc(60px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Adjust bottom nav to handle iPhone safe area home indicator line */
+  .bottom-nav {
+    height: calc(68px + env(safe-area-inset-bottom));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  
+  /* Add matching padding to app content area to prevent drawer/navbar overlap */
+  .app-content {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+}

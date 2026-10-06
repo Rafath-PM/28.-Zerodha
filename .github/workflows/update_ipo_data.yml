@@ -1,0 +1,43 @@
+name: Auto Update IPO Data
+
+on:
+  schedule:
+    # Runs every 6 hours automatically (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        run: |
+          python scrape_ipos.py
+
+      - name: Copy to www Directory
+        run: |
+          mkdir -p www
+          cp ipo_data.json www/ipo_data.json
+
+      - name: Commit and Push Updated Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ipo_data.json www/ipo_data.json
+          git status
+          git diff-index --quiet HEAD || git commit -m "Auto-update IPO database [skip ci]"
+          git push

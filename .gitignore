@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# OS / System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+sync.log

@@ -1,0 +1,19 @@
+{
+  "name": "ipo-tracker-app",
+  "version": "1.0.0",
+  "description": "A premium, responsive, mobile-first Web/PWA application built to track and analyze the listing and current performance of major Indian Mainboard IPOs over the past three years (May 2023 - May 2026).",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "mkdir -p www && cp index.html style.css app.js chart.js ipo_data.json manifest.json sw.js www/ && cp -r icons www/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4"
+  }
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IPO Pulse - 3-Year IPO Performance Tracker</title>
+  
+  <!-- iOS PWA Standalone Config -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IPO Pulse">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js Library -->
+  <script src="chart.js"></script>
+</head>
+<body>
+
+  <!-- Background Decorative Orbs -->
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+
+  <!-- Device Simulator Container (desktop only, scales on mobile) -->
+  <div class="phone-wrapper">
+    <div class="phone-container">
+      
+      <!-- Status Bar Simulator -->
+      <div class="status-bar">
+        <span class="status-time" id="status-time">22:38</span>
+        <div class="status-notch"></div>
+        <div class="status-icons">
+          <i class="fas fa-signal"></i>
+          <i class="fas fa-wifi"></i>
+          <i class="fas fa-battery-three-quarters"></i>
+        </div>
+      </div>
+
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="header-logo">
+          <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="logo-text">
+            <h1>IPO Pulse</h1>
+            <span class="sub-text">3-Year Performance Tracker</span>
+          </div>
+        </div>
+        <button class="profile-btn" id="profile-btn" aria-label="Profile">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="Avatar">
+        </button>
+      </header>
+
+      <!-- Main Scrollable Content -->
+      <main class="app-content">
+        
+        <!-- Summary Cards Carousel -->
+        <section class="summary-section">
+          <div class="summary-card total-stats">
+            <div class="card-inner">
+              <span class="stat-label">Average Listing Gain</span>
+              <h2 class="stat-value" id="avg-gain">+32.4%</h2>
+              <div class="stat-meta">
+                <span class="text-trend positive"><i class="fas fa-arrow-trend-up"></i> Strong Market</span>
+                <span>18 IPOs Tracked</span>
+              </div>
+            </div>
+          </div>
+          <div class="summary-card top-performer">
+            <div class="card-inner">
+              <span class="stat-label">Top Performer</span>
+              <h2 class="stat-value text-green" id="top-perf">Tata Tech</h2>
+              <div class="stat-meta">
+                <span class="positive">+140% Listing Gain</span>
+              </div>
+            </div>
+          </div>
+          <div class="summary-card low-performer">
+            <div class="card-inner">
+              <span class="stat-label">Under Performer</span>
+              <h2 class="stat-value text-red" id="low-perf">Amir Chand</h2>
+              <div class="stat-meta">
+                <span class="negative">-40.0% Current Loss</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search and Filters Section -->
+        <section class="controls-section">
+          <div class="search-bar-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="Search by company name or symbol..." autocomplete="off">
+            <button class="clear-search-btn" id="clear-search" style="display: none;"><i class="fas fa-times-circle"></i></button>
+          </div>
+
+          <div class="filters-row" style="margin-bottom: 8px;">
+            <div class="chip-label"><i class="fas fa-layer-group"></i> Category</div>
+            <div class="filter-chips" id="category-filter-container">
+              <button class="category-chip active" data-category="all">All IPOs</button>
+              <button class="category-chip" data-category="listed">Listed</button>
+              <button class="category-chip" data-category="unlisted">Awaiting Listing</button>
+            </div>
+          </div>
+
+          <div class="filters-row">
+            <div class="chip-label"><i class="fas fa-filter"></i> Year</div>
+            <div class="filter-chips" id="year-filter-container">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="2026">2026</button>
+              <button class="filter-chip" data-filter="2025">2025</button>
+              <button class="filter-chip" data-filter="2024">2024</button>
+              <button class="filter-chip" data-filter="2023">2023</button>
+            </div>
+          </div>
+
+          <div class="sorting-row">
+            <label for="sort-select"><i class="fas fa-sort-amount-down"></i> Sort By:</label>
+            <select id="sort-select">
+              <option value="date-desc">Newest Listings first</option>
+              <option value="date-asc">Oldest Listings first</option>
+              <option value="gain-desc">Listing Gain: High to Low</option>
+              <option value="gain-asc">Listing Gain: Low to High</option>
+              <option value="current-desc">Current Return: High to Low</option>
+              <option value="current-asc">Current Return: Low to High</option>
+              <option value="name-asc">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Dynamic Stock Cards List -->
+        <section class="stocks-section">
+          <div class="section-header">
+            <h3>Listed Stocks (<span id="stock-count">18</span>)</h3>
+            <span class="live-indicator"><span class="pulse"></span> Market Live</span>
+          </div>
+          <div class="stocks-list" id="stocks-list">
+            <!-- Dynamically populated from app.js -->
+            <div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading IPO database...</div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Navigation Bar -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-nav="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-nav="watchlist">
+          <i class="fas fa-bookmark"></i>
+          <span>Watchlist</span>
+        </button>
+        <button class="nav-item" data-nav="stats">
+          <i class="fas fa-chart-pie"></i>
+          <span>Stats</span>
+        </button>
+        <button class="nav-item" data-nav="profile">
+          <i class="fas fa-user-circle"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+      <!-- Detail Drawer Modal (slides up from bottom) -->
+      <div class="drawer-backdrop" id="drawer-backdrop"></div>
+      <div class="detail-drawer" id="detail-drawer">
+        <div class="drawer-header">
+          <div class="drawer-notch"></div>
+          <button class="close-drawer" id="close-drawer" aria-label="Close details"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-content" id="drawer-content">
+          <!-- Dynamically populated from app.js -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
