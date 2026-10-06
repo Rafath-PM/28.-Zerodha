@@ -373,6 +373,7 @@ function renderStocks() {
     const isGainListing = stock.listingGain >= 0;
     const isCurrentReturnPositive = stock.currentReturn >= 0;
     const isSaved = watchlist.includes(stock.id);
+    const isUnlisted = stock.status === "unlisted";
     
     const card = document.createElement("div");
     card.className = "stock-card";
@@ -384,17 +385,23 @@ function renderStocks() {
           </button>
           <h4>${stock.name}</h4>
         </div>
-        <span class="listing-date"><i class="far fa-calendar-alt"></i> Listed: ${formatDate(stock.listingDate)}</span>
+        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUnlisted ? 'Listing Expected:' : 'Listed:'} ${formatDate(stock.listingDate)}</span>
         <div class="price-row">
-          <span>Issue: ₹${stock.issuePrice}</span> • <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>
+          <span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : ''}
         </div>
       </div>
       <div class="stock-card-right">
-        <span class="current-price">₹${stock.currentPrice.toFixed(1)}</span>
-        <span class="badge ${isCurrentReturnPositive ? 'positive' : 'negative'}">
-          <i class="fas ${isCurrentReturnPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
-          ${isCurrentReturnPositive ? '+' : ''}${stock.currentReturn.toFixed(1)}%
-        </span>
+        ${isUnlisted ? `
+          <span class="badge" style="background-color: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.3); color: #f59e0b; font-size: 0.72rem; padding: 4px 10px;">
+            <i class="fas fa-clock"></i> Awaiting Listing
+          </span>
+        ` : `
+          <span class="current-price">₹${stock.currentPrice.toFixed(1)}</span>
+          <span class="badge ${isCurrentReturnPositive ? 'positive' : 'negative'}">
+            <i class="fas ${isCurrentReturnPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
+            ${isCurrentReturnPositive ? '+' : ''}${stock.currentReturn.toFixed(1)}%
+          </span>
+        `}
       </div>
     `;
     
