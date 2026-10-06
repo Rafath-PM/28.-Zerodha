@@ -47,6 +47,8 @@
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 body {
@@ -59,6 +61,14 @@ body {
   align-items: center;
   overflow: hidden;
   position: relative;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea, select {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Background Decorative Orbs */

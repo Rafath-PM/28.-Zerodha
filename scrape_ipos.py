@@ -235,14 +235,34 @@ def main():
     # Scrape active unlisted IPOs (e.g. VNL, Nityas Gems, etc.)
     print("Scraping active unlisted IPOs awaiting listing...")
     unlisted_ipos = fetch_unlisted_ipos()
-    # Filter out duplicates if already in cleaned_stocks
-    existing_names = {s["name"].lower() for s in cleaned_stocks}
+    
+    # Helper to extract base tokens for deduplication against already listed stocks
+    def get_base_tokens(name):
+        cleaned = re.sub(r'\b(ltd|limited|ipo|inc|corp|corporation|india|private|pvt)\b', '', name.lower())
+        tokens = [t for t in re.findall(r'[a-z0-9]+', cleaned) if len(t) > 2]
+        return set(tokens)
+
+    listed_tokens_list = [(s['name'], get_base_tokens(s['name'])) for s in cleaned_stocks if s.get('status') == 'listed']
+
+    def is_already_listed(unlisted_name):
+        u_toks = get_base_tokens(unlisted_name)
+        if not u_toks:
+            return False
+        for lname, l_toks in listed_tokens_list:
+            overlap = u_toks.intersection(l_toks)
+            if len(u_toks) == 1 and len(overlap) == 1:
+                if len(list(overlap)[0]) >= 4:
+                    return True
+            elif len(overlap) >= 2:
+                return True
+        return False
+
     added_unlisted = 0
     for u_stock in unlisted_ipos:
-        if u_stock["name"].lower() not in existing_names and u_stock["name"].replace(" IPO", "").lower() not in existing_names:
+        if not is_already_listed(u_stock["name"]):
             cleaned_stocks.append(u_stock)
             added_unlisted += 1
-    print(f"Added {added_unlisted} active unlisted IPOs.")
+    print(f"Added {added_unlisted} genuine unlisted IPOs awaiting listing.")
 
     # 3. Save JSON database
     output_path = "/Users/rafath/Antigravity Projects/28. Zerodha/ipo-tracker-app/ipo_data.json"
