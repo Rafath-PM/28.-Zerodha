@@ -257,12 +257,42 @@ def main():
                 return True
         return False
 
+    def parse_end_date(date_str):
+        if not date_str:
+            return None
+        months = {
+            'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+            'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+            'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'october': 10, 'oct': 10,
+            'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+        }
+        found_month = None
+        for m_name, m_num in months.items():
+            if m_name in date_str.lower():
+                found_month = m_num
+                break
+        if not found_month:
+            return None
+        nums = re.findall(r'\d+', date_str)
+        if len(nums) >= 2:
+            end_day = int(nums[1])
+            try:
+                import datetime
+                return datetime.date(2026, found_month, end_day)
+            except:
+                return None
+        return None
+
     added_unlisted = 0
     for u_stock in unlisted_ipos:
-        ed = str(u_stock.get("expectedDate", ""))
-        # Only include active recent IPOs from current/recent subscription window (September/October 2026)
-        is_recent_window = any(m in ed for m in ["October", "Oct", "September", "Sep"]) or not u_stock.get("expectedDate")
-        if is_recent_window and not is_already_listed(u_stock["name"]):
+        ed = parse_end_date(u_stock.get("expectedDate"))
+        # Only include active recent IPOs whose bidding ended within the last 10 days (>= Sep 25 or October)
+        is_active_window = False
+        if ed:
+            if (ed.month == 10) or (ed.month == 9 and ed.day >= 25):
+                is_active_window = True
+                
+        if is_active_window and not is_already_listed(u_stock["name"]):
             cleaned_stocks.append(u_stock)
             added_unlisted += 1
     print(f"Added {added_unlisted} genuine unlisted IPOs awaiting listing.")
