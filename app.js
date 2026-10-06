@@ -374,6 +374,7 @@ function renderStocks() {
     const isCurrentReturnPositive = stock.currentReturn >= 0;
     const isSaved = watchlist.includes(stock.id);
     const isUnlisted = stock.status === "unlisted";
+    const isUpcoming = stock.status === "upcoming";
     
     const card = document.createElement("div");
     card.className = "stock-card";
@@ -385,13 +386,17 @@ function renderStocks() {
           </button>
           <h4>${stock.name}</h4>
         </div>
-        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUnlisted ? 'Listing Expected:' : 'Listed:'} ${formatDate(stock.listingDate)}</span>
+        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUpcoming ? 'Status:' : (isUnlisted ? 'Listing Expected:' : 'Listed:')} ${isUpcoming ? stock.listingDate : formatDate(stock.listingDate)}</span>
         <div class="price-row">
-          <span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : ''}
+          ${isUpcoming ? `<span>Price Band: ${stock.priceBand || 'TBA'}</span> • <span>Size: ${stock.issueSize || 'TBA'}</span>` : `<span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : ''}`}
         </div>
       </div>
       <div class="stock-card-right">
-        ${isUnlisted ? `
+        ${isUpcoming ? `
+          <span class="badge" style="background-color: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; font-size: 0.72rem; padding: 4px 10px;">
+            <i class="fas fa-file-contract"></i> DRHP Filed
+          </span>
+        ` : (isUnlisted ? `
           <span class="badge" style="background-color: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.3); color: #f59e0b; font-size: 0.72rem; padding: 4px 10px;">
             <i class="fas fa-clock"></i> Awaiting Listing
           </span>
@@ -401,7 +406,7 @@ function renderStocks() {
             <i class="fas ${isCurrentReturnPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
             ${isCurrentReturnPositive ? '+' : ''}${stock.currentReturn.toFixed(1)}%
           </span>
-        `}
+        `)}
       </div>
     `;
     

@@ -226,6 +226,12 @@ def main():
     for stock in cleaned_stocks:
         stock.pop("detail_url", None)
         
+    # Scrape upcoming DRHP filings
+    print("Scraping upcoming DRHP filings...")
+    drhp_stocks = fetch_drhp_stocks()
+    cleaned_stocks.extend(drhp_stocks)
+    print(f"Added {len(drhp_stocks)} upcoming DRHP stocks.")
+
     # 3. Save JSON database
     output_path = "/Users/rafath/Antigravity Projects/28. Zerodha/ipo-tracker-app/ipo_data.json"
     with open(output_path, "w") as out_file:
@@ -235,5 +241,47 @@ def main():
     print(f"Scraper finished in {end_time - start_time:.2f} seconds.")
     print(f"Database saved to {output_path}")
 
+def fetch_drhp_stocks():
+    drhp_stocks = []
+    try:
+        url = 'https://ipowatch.in/upcoming-ipo-list/'
+        req = requests.get(url, headers=headers, timeout=15)
+        if req.status_code == 200:
+            soup = BeautifulSoup(req.text, 'html.parser')
+            tables = soup.find_all('table')
+            if len(tables) >= 3:
+                rows = tables[2].find_all('tr')[1:]
+                for idx, r in enumerate(rows):
+                    cols = [td.get_text(strip=True) for td in r.find_all(['th', 'td'])]
+                    if len(cols) >= 4:
+                        name = cols[0]
+                        date = cols[1]
+                        price = cols[2]
+                        size = cols[3]
+                        drhp_status = cols[4] if len(cols) > 4 else 'DRHP'
+                        
+                        drhp_stocks.append({
+                            'id': f'drhp-{idx+1}',
+                            'name': name,
+                            'symbol': 'DRHP',
+                            'listingDate': f'Expected {date}' if date != 'TBA' else 'DRHP Filed',
+                            'issuePrice': 0.0,
+                            'listingPrice': 0.0,
+                            'listingGain': 0.0,
+                            'currentPrice': 0.0,
+                            'currentReturn': 0.0,
+                            'status': 'upcoming',
+                            'sector': 'Mainboard DRHP',
+                            'description': f'{name} has submitted its Draft Red Herring Prospectus (DRHP) to SEBI. Expected issue size is {size} with price band {price}.',
+                            'recommendation': f'Price Band: {price} | Issue Size: {size}',
+                            'authorRecommendation': 'DRHP Filed' if drhp_status in ['DRHP', '–'] else drhp_status,
+                            'priceBand': price,
+                            'issueSize': size
+                        })
+    except Exception as e:
+        print('Error fetching DRHP stocks:', e)
+    return drhp_stocks
+
 if __name__ == "__main__":
     main()
+
