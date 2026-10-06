@@ -296,6 +296,11 @@ def fetch_unlisted_ipos():
                         
                         clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', name).upper()[:10]
                         
+                        status_type = 'unlisted'
+                        # Determine if currently open based on issue dates string (e.g. "30-5 October", "28-30 September")
+                        if 'October' in date or 'Oct' in date:
+                            status_type = 'open'
+                            
                         unlisted_stocks.append({
                             'id': f'unlisted-ipowatch-{idx+1}',
                             'name': name,
@@ -307,11 +312,11 @@ def fetch_unlisted_ipos():
                             'listingGain': 0.0,
                             'currentPrice': 0.0,
                             'currentReturn': 0.0,
-                            'status': 'unlisted',
+                            'status': status_type,
                             'sector': 'Mainboard IPO',
-                            'description': f'{name} IPO is open / awaiting listing (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
+                            'description': f'{name} IPO is {status_type} (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
                             'recommendation': f'Price Band: {price_band} | Issue Size: {size}',
-                            'authorRecommendation': f'Awaiting Listing ({date})',
+                            'authorRecommendation': f'{"IPO Open" if status_type == "open" else "Awaiting Listing"} ({date})',
                             'priceBand': price_band,
                             'issueSize': size
                         })
