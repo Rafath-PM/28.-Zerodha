@@ -281,29 +281,31 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Calculate Stats for Dashboard based on filtered list
+// Calculate Stats for Dashboard based on filtered list (STRICTLY LISTED STOCKS ONLY)
 function updateDashboardStats(data) {
-  if (data.length === 0) {
+  const listedOnly = data.filter(stock => stock.status === "listed");
+  
+  if (listedOnly.length === 0) {
     avgGainEl.textContent = "0.0%";
     topPerfEl.textContent = "N/A";
     lowPerfEl.textContent = "N/A";
     return;
   }
   
-  // Avg Listing Gain
-  const sumGain = data.reduce((acc, curr) => acc + curr.listingGain, 0);
-  const avgGain = sumGain / data.length;
+  // Avg Listing Gain (Strictly listed stocks)
+  const sumGain = listedOnly.reduce((acc, curr) => acc + (curr.listingGain || 0), 0);
+  const avgGain = sumGain / listedOnly.length;
   avgGainEl.textContent = `${avgGain > 0 ? '+' : ''}${avgGain.toFixed(1)}%`;
   
-  // Top Listing Performer
-  const topStock = [...data].sort((a, b) => b.listingGain - a.listingGain)[0];
-  topPerfEl.textContent = topStock.symbol;
+  // Top Listing Performer (Strictly listed stocks)
+  const topStock = [...listedOnly].sort((a, b) => (b.listingGain || 0) - (a.listingGain || 0))[0];
+  topPerfEl.textContent = topStock.symbol || topStock.name;
   topPerfEl.className = `stat-value ${topStock.listingGain >= 0 ? 'text-green' : 'text-red'}`;
   document.querySelector(".top-performer .positive").textContent = `${topStock.listingGain > 0 ? '+' : ''}${topStock.listingGain.toFixed(0)}% Listing Gain`;
   
-  // Underperformer (lowest current return)
-  const lowStock = [...data].sort((a, b) => a.currentReturn - b.currentReturn)[0];
-  lowPerfEl.textContent = lowStock.symbol;
+  // Underperformer (lowest current return, strictly listed stocks)
+  const lowStock = [...listedOnly].sort((a, b) => (a.currentReturn || 0) - (b.currentReturn || 0))[0];
+  lowPerfEl.textContent = lowStock.symbol || lowStock.name;
   lowPerfEl.className = `stat-value ${lowStock.currentReturn >= 0 ? 'text-green' : 'text-red'}`;
   document.querySelector(".low-performer .negative").textContent = `${lowStock.currentReturn > 0 ? '+' : ''}${lowStock.currentReturn.toFixed(0)}% Current Return`;
 }
@@ -351,8 +353,9 @@ function renderStocks() {
     }
   });
 
-  // Update Stock Count
+  // Update Stock Count & Top Dashboard Stats
   stockCountEl.textContent = filtered.length;
+  updateDashboardStats(filtered);
 
   // Clear container
   stocksListContainer.innerHTML = "";

@@ -281,9 +281,13 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Calculate Stats for Dashboard based on filtered list (STRICTLY LISTED STOCKS ONLY)
+// Calculate Stats for Dashboard based on listed stocks (Always active & non-zero)
 function updateDashboardStats(data) {
-  const listedOnly = data.filter(stock => stock.status === "listed");
+  // Use current filtered listed stocks if present, otherwise fallback to global ipoData listed stocks
+  let listedOnly = (data || []).filter(stock => stock.status === "listed");
+  if (listedOnly.length === 0 && typeof ipoData !== 'undefined') {
+    listedOnly = ipoData.filter(stock => stock.status === "listed");
+  }
   
   if (listedOnly.length === 0) {
     avgGainEl.textContent = "0.0%";
@@ -301,13 +305,19 @@ function updateDashboardStats(data) {
   const topStock = [...listedOnly].sort((a, b) => (b.listingGain || 0) - (a.listingGain || 0))[0];
   topPerfEl.textContent = topStock.symbol || topStock.name;
   topPerfEl.className = `stat-value ${topStock.listingGain >= 0 ? 'text-green' : 'text-red'}`;
-  document.querySelector(".top-performer .positive").textContent = `${topStock.listingGain > 0 ? '+' : ''}${topStock.listingGain.toFixed(0)}% Listing Gain`;
+  const topPositiveEl = document.querySelector(".top-performer .positive");
+  if (topPositiveEl) {
+    topPositiveEl.textContent = `${topStock.listingGain > 0 ? '+' : ''}${topStock.listingGain.toFixed(0)}% Listing Gain`;
+  }
   
   // Underperformer (lowest current return, strictly listed stocks)
   const lowStock = [...listedOnly].sort((a, b) => (a.currentReturn || 0) - (b.currentReturn || 0))[0];
   lowPerfEl.textContent = lowStock.symbol || lowStock.name;
   lowPerfEl.className = `stat-value ${lowStock.currentReturn >= 0 ? 'text-green' : 'text-red'}`;
-  document.querySelector(".low-performer .negative").textContent = `${lowStock.currentReturn > 0 ? '+' : ''}${lowStock.currentReturn.toFixed(0)}% Current Return`;
+  const lowNegativeEl = document.querySelector(".low-performer .negative");
+  if (lowNegativeEl) {
+    lowNegativeEl.textContent = `${lowStock.currentReturn > 0 ? '+' : ''}${lowStock.currentReturn.toFixed(0)}% Current Return`;
+  }
 }
 
 // Render dynamic stock card list
