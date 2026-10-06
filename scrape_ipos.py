@@ -188,6 +188,10 @@ def main():
         if not listing_price or not current_price or listing_price == 0:
             status = "unlisted"
             
+        # Skip unlisted stocks from the historical performance tracker index to avoid duplicate unlisted items
+        if status == "unlisted":
+            continue
+
         cleaned_stocks.append({
             "id": f"stock-{ipo_id}" if ipo_id else name.lower().replace(" ", "-"),
             "name": name,
@@ -284,6 +288,7 @@ def main():
         return None
 
     added_unlisted = 0
+    seen_unlisted_names = set()
     for u_stock in unlisted_ipos:
         ed = parse_end_date(u_stock.get("expectedDate"))
         # Only include active recent IPOs whose bidding ended within the last 10 days (>= Sep 25 or October)
@@ -291,8 +296,13 @@ def main():
         if ed:
             if (ed.month == 10) or (ed.month == 9 and ed.day >= 25):
                 is_active_window = True
-                
-        if is_active_window and not is_already_listed(u_stock["name"]):
+        elif not u_stock.get("expectedDate"):
+            is_active_window = True
+            
+        base_name_clean = re.sub(r'\b(sme|ltd|limited|ipo)\b', '', u_stock["name"].lower()).strip()
+        
+        if is_active_window and not is_already_listed(u_stock["name"]) and base_name_clean not in seen_unlisted_names:
+            seen_unlisted_names.add(base_name_clean)
             cleaned_stocks.append(u_stock)
             added_unlisted += 1
     print(f"Added {added_unlisted} genuine unlisted IPOs awaiting listing.")
