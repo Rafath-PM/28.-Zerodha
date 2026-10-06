@@ -386,9 +386,9 @@ function renderStocks() {
           </button>
           <h4>${stock.name}</h4>
         </div>
-        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUpcoming ? 'Status:' : (isUnlisted ? 'Listing Expected:' : 'Listed:')} ${isUpcoming ? stock.listingDate : formatDate(stock.listingDate)}</span>
+        <span class="listing-date"><i class="far fa-calendar-alt"></i> ${isUpcoming ? 'Status:' : (isUnlisted ? 'Listing Expected:' : 'Listed:')} ${isUpcoming ? stock.listingDate : (stock.expectedDate ? stock.expectedDate : formatDate(stock.listingDate))}</span>
         <div class="price-row">
-          ${isUpcoming ? `<span>Price Band: ${stock.priceBand || 'TBA'}</span> • <span>Size: ${stock.issueSize || 'TBA'}</span>` : `<span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : ''}`}
+          ${isUpcoming ? `<span>Price Band: ${stock.priceBand || 'TBA'}</span> • <span>Size: ${stock.issueSize || 'TBA'}</span>` : `<span>Issue Price: ₹${stock.issuePrice}</span> ${!isUnlisted ? `• <span>List: ₹${stock.listingPrice} (<span class="${isGainListing ? 'text-green' : 'text-red'}" style="font-weight: 600;">${isGainListing ? '+' : ''}${stock.listingGain.toFixed(1)}%</span>)</span>` : (stock.priceBand ? `• <span>Band: ${stock.priceBand}</span>` : '')}`}
         </div>
       </div>
       <div class="stock-card-right">
