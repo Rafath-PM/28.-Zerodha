@@ -232,6 +232,18 @@ def main():
     cleaned_stocks.extend(drhp_stocks)
     print(f"Added {len(drhp_stocks)} upcoming DRHP stocks.")
 
+    # Scrape active unlisted IPOs (e.g. VNL, Nityas Gems, etc.)
+    print("Scraping active unlisted IPOs awaiting listing...")
+    unlisted_ipos = fetch_unlisted_ipos()
+    # Filter out duplicates if already in cleaned_stocks
+    existing_names = {s["name"].lower() for s in cleaned_stocks}
+    added_unlisted = 0
+    for u_stock in unlisted_ipos:
+        if u_stock["name"].lower() not in existing_names and u_stock["name"].replace(" IPO", "").lower() not in existing_names:
+            cleaned_stocks.append(u_stock)
+            added_unlisted += 1
+    print(f"Added {added_unlisted} active unlisted IPOs.")
+
     # 3. Save JSON database
     output_path = "/Users/rafath/Antigravity Projects/28. Zerodha/ipo-tracker-app/ipo_data.json"
     with open(output_path, "w") as out_file:
@@ -240,6 +252,52 @@ def main():
     end_time = time.time()
     print(f"Scraper finished in {end_time - start_time:.2f} seconds.")
     print(f"Database saved to {output_path}")
+
+def fetch_unlisted_ipos():
+    unlisted_stocks = []
+    try:
+        url = 'https://ipowatch.in/upcoming-ipo-list/'
+        req = requests.get(url, headers=headers, timeout=15)
+        if req.status_code == 200:
+            soup = BeautifulSoup(req.text, 'html.parser')
+            tables = soup.find_all('table')
+            if len(tables) >= 1:
+                rows = tables[0].find_all('tr')[1:]
+                for idx, r in enumerate(rows):
+                    cols = [td.get_text(strip=True) for td in r.find_all(['th', 'td'])]
+                    if len(cols) >= 4:
+                        name = cols[0]
+                        date = cols[1]
+                        size = cols[2]
+                        price_band = cols[3]
+                        
+                        prices = re.findall(r'\d+(?:\.\d+)?', price_band.replace(',', ''))
+                        issue_price = float(prices[-1]) if prices else 0.0
+                        
+                        clean_symbol = re.sub(r'[^a-zA-Z0-9]', '', name).upper()[:10]
+                        
+                        unlisted_stocks.append({
+                            'id': f'unlisted-ipowatch-{idx+1}',
+                            'name': name,
+                            'symbol': clean_symbol or 'UNLISTED',
+                            'listingDate': '2026-10-06',
+                            'expectedDate': date,
+                            'issuePrice': issue_price,
+                            'listingPrice': 0.0,
+                            'listingGain': 0.0,
+                            'currentPrice': 0.0,
+                            'currentReturn': 0.0,
+                            'status': 'unlisted',
+                            'sector': 'Mainboard IPO',
+                            'description': f'{name} IPO is open / awaiting listing (Issue Dates: {date}). Expected Issue Size is {size} with Price Band of {price_band}. Listing on stock exchanges shortly.',
+                            'recommendation': f'Price Band: {price_band} | Issue Size: {size}',
+                            'authorRecommendation': f'Awaiting Listing ({date})',
+                            'priceBand': price_band,
+                            'issueSize': size
+                        })
+    except Exception as e:
+        print('Error fetching unlisted IPOs:', e)
+    return unlisted_stocks
 
 def fetch_drhp_stocks():
     drhp_stocks = []
@@ -284,4 +342,5 @@ def fetch_drhp_stocks():
 
 if __name__ == "__main__":
     main()
+
 
